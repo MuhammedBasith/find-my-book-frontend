@@ -1,4 +1,3 @@
-
 import { BookCard } from './BookCard';
 
 interface Price {
@@ -25,7 +24,7 @@ export function BookResults({ books, isLoading }: BookResultsProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
-        {[...Array(4)].map((_, i) => (
+        {[...Array(1)].map((_, i) => (
           <div
             key={i}
             className="h-48 bg-gray-100 rounded-xl animate-pulse"

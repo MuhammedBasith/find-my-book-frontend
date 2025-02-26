@@ -1,6 +1,6 @@
-
+// src/pages/BookDetail.tsx
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, BookOpen, DollarSign, Store } from 'lucide-react';
+import { ArrowLeft, BookOpen, IndianRupee, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -9,28 +9,24 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-
-// Temporary mock data - would be replaced with real data fetching
-const getMockBook = (id: string) => ({
-  id,
-  title: "The Midnight Library",
-  author: "Matt Haig",
-  isbn: "9780525559474",
-  description: "Between life and death there is a library, and within that library, the shelves go on forever. Every book provides a chance to try another life you could have lived.",
-  imageUrl: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400",
-  prices: [
-    { store: "Amazon", price: 14.99, url: "#" },
-    { store: "BookStore", price: 16.99, url: "#" },
-    { store: "Library", price: 12.99, url: "#" },
-  ],
-  publishedDate: "2020-08-13",
-  publisher: "Viking",
-  pageCount: 304,
-});
+import { useBookStore } from '@/store/bookStore';
 
 export default function BookDetail() {
   const { id } = useParams();
-  const book = getMockBook(id || '');
+  const { selectedBook } = useBookStore(); // Retrieve the selected book from Zustand
+
+  if (!selectedBook) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600">Book not found. Please go back to the search results.</p>
+        <Link to="/">
+          <Button variant="ghost" className="mt-4">Back to Search</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const book = selectedBook; // Use the book data from Zustand
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
@@ -82,6 +78,12 @@ export default function BookDetail() {
                     <p className="text-sm text-gray-500">Pages</p>
                     <p className="font-medium">{book.pageCount}</p>
                   </div>
+
+                  <div>
+                  <p className="text-sm text-gray-500">Description</p>
+
+
+                  </div>
                 </div>
 
                 <p className="text-gray-600 mb-8">{book.description}</p>
@@ -104,7 +106,7 @@ export default function BookDetail() {
                                 <span className="font-medium">{price.store}</span>
                               </div>
                               <div className="flex items-center gap-1 text-green-600">
-                                <DollarSign className="w-4 h-4" />
+                                <IndianRupee className="w-4 h-4" />
                                 <span className="font-bold">{price.price.toFixed(2)}</span>
                               </div>
                             </a>

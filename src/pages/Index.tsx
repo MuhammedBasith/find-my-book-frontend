@@ -6,72 +6,46 @@ import { useToast } from '@/components/ui/use-toast';
 import { ArrowRight, BookOpen, Search, DollarSign, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const mockBooks = [
-  {
-    id: '1',
-    title: "The Midnight Library",
-    author: "Matt Haig",
-    isbn: "9780525559474",
-    imageUrl: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=200",
-    prices: [
-      { store: "Amazon", price: 14.99, url: "#" },
-      { store: "BookStore", price: 16.99, url: "#" },
-      { store: "Library", price: 12.99, url: "#" },
-    ],
-  },
-  {
-    id: '2',
-    title: "Project Hail Mary",
-    author: "Andy Weir",
-    isbn: "9780593135204",
-    imageUrl: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=200",
-    prices: [
-      { store: "Amazon", price: 18.99, url: "#" },
-      { store: "BookStore", price: 19.99, url: "#" },
-      { store: "Library", price: 17.99, url: "#" },
-    ],
-  },
-];
 
 export default function Index() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [books, setBooks] = useState<typeof mockBooks>([]);
+  const [books, setBooks] = useState<any>([]);
   const [hasSearched, setHasSearched] = useState(false);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     setHasSearched(true);
-
+  
     try {
-      // Make a request to the backend API
       const response = await axios.post(`${import.meta.env.VITE_APP_BACKEND_BASE_URL}/api/v1/book`, { bookName: query });
-
-      // Assuming the response is in the format as you shared
-      const { success, data } = response;
-
+  
+      const { success, data } = response.data;
+  
+  
       if (success && data) {
-        const formattedBooks = data.map((book: any) => ({
-          id: book.isbn,
-          title: book.title,
-          author: book.authors.join(', '), // Join authors if there are multiple
-          imageUrl: book.thumbnail,
-          prices: Object.keys(book.prices).map((store) => ({
-            store,
-            price: book.prices[store],
-            url: book.infoLink, // Assuming the infoLink is used for the store URL
-          })),
-        }));
 
+        const formattedBooks = [{
+          id: 1,
+          title: data.title,
+          author: data.authors.join(', '),
+          imageUrl: data.thumbnail,
+          prices: Object.keys(data.prices).map((store) => ({
+            store,
+            price: data.prices[store],
+          })),
+        }];
+  
         setBooks(formattedBooks);
+  
         toast({
           title: "Search completed",
-          description: `Found ${formattedBooks.length} books matching "${query}"`,
+          description: `Found 1 book matching "₹{query}"`,
         });
       } else {
         toast({
           title: "No books found",
-          description: `No books found matching "${query}". Please try again.`,
+          description: `No books found matching "₹{query}". Please try again.`,
         });
         setBooks([]);
       }
@@ -80,11 +54,14 @@ export default function Index() {
         title: "Error",
         description: "An error occurred while fetching book data. Please try again.",
       });
+      console.log(error);
       setBooks([]);
     } finally {
       setIsLoading(false);
     }
   };
+  
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">

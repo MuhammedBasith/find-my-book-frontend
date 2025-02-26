@@ -1,5 +1,4 @@
-
-import { Book as BookIcon, DollarSign, Store } from 'lucide-react';
+import { Book as BookIcon, IndianRupee, Store } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import {
@@ -8,6 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useBookStore } from '../store/bookStore';
 
 interface Price {
   store: string;
@@ -22,13 +22,36 @@ interface BookCardProps {
   prices: Price[];
   imageUrl?: string;
   isbn?: string;
+  pageCount?: any
 }
 
-export function BookCard({ id, title, author, prices, imageUrl, isbn }: BookCardProps) {
-  const lowestPrice = Math.min(...prices.map(p => p.price));
-  
+export function BookCard({
+  id,
+  title,
+  author,
+  prices,
+  imageUrl,
+  isbn,
+  pageCount,
+}: BookCardProps) {
+  const setSelectedBook = useBookStore((state) => state.setSelectedBook);
+
+  const lowestPrice = Math.min(...prices.map((p) => p.price));
+
+  const handleClick = () => {
+    setSelectedBook({
+      id,
+      title,
+      author,
+      imageUrl,
+      isbn,
+      prices,
+      pageCount
+    });
+  };
+
   return (
-    <Link to={`/book/${id}`}>
+    <Link to={`/book/${id}`} onClick={handleClick}>
       <Card className="overflow-hidden hover-scale transition-all duration-300 bg-white/80 backdrop-blur-sm border border-gray-200">
         <div className="p-4">
           <div className="flex items-start gap-4">
@@ -52,9 +75,9 @@ export function BookCard({ id, title, author, prices, imageUrl, isbn }: BookCard
               )}
               <div className="mt-4">
                 <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-green-600" />
+                  <IndianRupee className="w-4 h-4 text-green-600" />
                   <span className="font-semibold text-green-600">
-                    ${lowestPrice.toFixed(2)}
+                    ₹{lowestPrice.toFixed(2)}
                   </span>
                   <span className="text-sm text-gray-500">lowest price</span>
                 </div>
@@ -68,11 +91,11 @@ export function BookCard({ id, title, author, prices, imageUrl, isbn }: BookCard
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) => e.stopPropagation()} // prevent Link click
                           >
                             <Store className="w-4 h-4" />
                             <span>{price.store}</span>
-                            <span className="font-medium">${price.price.toFixed(2)}</span>
+                            <span className="font-medium">₹{price.price.toFixed(2)}</span>
                           </a>
                         </TooltipTrigger>
                         <TooltipContent>
