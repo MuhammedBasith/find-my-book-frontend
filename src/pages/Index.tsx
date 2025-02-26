@@ -48,7 +48,7 @@ export default function Index() {
       const response = await axios.post(`${import.meta.env.VITE_APP_BACKEND_BASE_URL}/api/v1/book`, { bookName: query });
 
       // Assuming the response is in the format as you shared
-      const { success, data } = response.data;
+      const { success, data } = response;
 
       if (success && data) {
         const formattedBooks = data.map((book: any) => ({
