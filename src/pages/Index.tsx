@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios'; // Import Axios for making the API request
 import { SearchBar } from '@/components/SearchBar';
 import { BookResults } from '@/components/BookResults';
 import { useToast } from '@/components/ui/use-toast';
@@ -41,14 +42,48 @@ export default function Index() {
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     setHasSearched(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setBooks(mockBooks);
-    setIsLoading(false);
-    
-    toast({
-      title: "Search completed",
-      description: `Found ${mockBooks.length} books matching "${query}"`,
-    });
+
+    try {
+      // Make a request to the backend API
+      const response = await axios.post(`${import.meta.env.VITE_APP_BACKEND_BASE_URL}/api/v1/book`, { bookName: query });
+
+      // Assuming the response is in the format as you shared
+      const { success, data } = response.data;
+
+      if (success && data) {
+        const formattedBooks = data.map((book: any) => ({
+          id: book.isbn,
+          title: book.title,
+          author: book.authors.join(', '), // Join authors if there are multiple
+          imageUrl: book.thumbnail,
+          prices: Object.keys(book.prices).map((store) => ({
+            store,
+            price: book.prices[store],
+            url: book.infoLink, // Assuming the infoLink is used for the store URL
+          })),
+        }));
+
+        setBooks(formattedBooks);
+        toast({
+          title: "Search completed",
+          description: `Found ${formattedBooks.length} books matching "${query}"`,
+        });
+      } else {
+        toast({
+          title: "No books found",
+          description: `No books found matching "${query}". Please try again.`,
+        });
+        setBooks([]);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while fetching book data. Please try again.",
+      });
+      setBooks([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -149,11 +184,7 @@ export default function Index() {
                 <div className="mt-24 text-center">
                   <h2 className="text-3xl font-bold mb-8">Trusted by Book Lovers</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {[
-                      { number: "1M+", label: "Books Compared" },
-                      { number: "50K+", label: "Happy Readers" },
-                      { number: "30+", label: "Trusted Retailers" }
-                    ].map((stat) => (
+                    {[{ number: "1M+", label: "Books Compared" }, { number: "50K+", label: "Happy Readers" }, { number: "30+", label: "Trusted Retailers" }].map((stat) => (
                       <div key={stat.label} className="p-6">
                         <div className="text-4xl font-bold text-violet-600 mb-2">{stat.number}</div>
                         <div className="text-gray-600">{stat.label}</div>
@@ -163,8 +194,9 @@ export default function Index() {
                 </div>
               </div>
             )}
+
           </div>
-          
+
           {(hasSearched || isLoading) && (
             <BookResults 
               books={books}
